@@ -6,15 +6,28 @@ import SignaturePad from 'signature_pad';
 import { handlePost } from './send_data';
 
 function App() {
-  const [formData, setFormData] = useState({
+  type FormData = {
+    name: string;
+    birthDate: string;
+    email: string;
+    age: string;
+    phone: string;
+    signature: string;
+    diseases: string[];
+    moreInfo: [string, string];
+  };
+
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     birthDate: '',
     email: '',
     age: '',
     phone: '',
-    // ...add more fields as needed
     signature: '',
+    diseases: [],
+    moreInfo: ['', '']
   });
+
 
   useEffect(() => {
     const canvas = document.getElementById("signature-canvas") as HTMLCanvasElement;
@@ -24,12 +37,28 @@ function App() {
     }
   }, []);
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  // Save checked checkbox texts instead of just idx
+  const handleCheckboxChange = (text: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => {
+
+      if (e.target.checked) {
+        // Add text if checked and not already present
+        return { ...prev, diseases: prev.diseases.includes(text) ? prev.diseases : [...prev.diseases, text] };
+      } else {
+        // Remove text if unchecked
+        return { ...prev, diseases: prev.diseases.filter(item => item !== text) };
+      }
+      
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,12 +69,34 @@ function App() {
     let signature = '';
     if (canvas && (window as any).signaturePad && !(window as any).signaturePad.isEmpty()) {
       signature = canvas.toDataURL();
+    } else {
+      console.log('No signature captured');
     }
 
-    
-
-    const email = formData.email;
-    await handlePost(email);
+    // Send the signature with the rest of the form data
+    const result = await handlePost({ ...formData, signature });
+    if (result) {
+      console.log('Data sent successfully:', result);
+      alert('הטופס נשלח בהצלחה!');
+      setFormData({
+        name: '',
+        birthDate: '',
+        email: '',
+        age: '',
+        phone: '',
+        signature: '',
+        diseases: [],
+        moreInfo: ['', '']
+      });
+      // Clear the signature pad
+      const canvas = document.getElementById("signature-canvas") as HTMLCanvasElement;
+      if (canvas && (window as any).signaturePad) {
+        (window as any).signaturePad.clear();
+      }
+      
+    } else {
+      console.log('Failed to send data');
+    }
 
   };
 
@@ -70,9 +121,6 @@ function App() {
 
           <label>אימייל:</label>
           <input name="email" type="email" required value={formData.email} onChange={handleChange} />
-
-          <label>גיל:</label>
-          <input name="age" type="number" min="0" required value={formData.age} onChange={handleChange} />
 
           <label>טלפון:</label>
           <input name="phone" type="tel" required value={formData.phone} onChange={handleChange} />
@@ -99,8 +147,12 @@ function App() {
               'האם את/ה מאשר/ת עיסוי בקרקפת?',
               'האם את/ה מאשר/ת פרסום תמונות?'
             ].map((text, idx) => (
-              <label key={idx} className="checkbox-item">
-                <input type="checkbox" />
+              <label className="checkbox-item" key={idx}>
+                <input
+                  type="checkbox"
+                  checked={formData.diseases.includes(text)}
+                  onChange={handleCheckboxChange(text)}
+                />
                 <span className="custom-checkbox"></span>
                 {text}
               </label>
@@ -108,10 +160,10 @@ function App() {
           </div>
 
           <label>מה הביא אותך לטיפול פנים?</label>
-          <input type="text" required />
+          <input type="text" required value={formData.moreInfo[0]} onChange={e => setFormData({ ...formData, moreInfo: [e.target.value, formData.moreInfo[1]] })} />
 
           <label>האם את/ה משתמש/ת בחומרים לפנים באופן יום-יומי? אם כן פרט/י:</label>
-          <input type="text" required />
+          <input type="text" required value={formData.moreInfo[1]} onChange={e => setFormData({ ...formData, moreInfo: [formData.moreInfo[0], e.target.value] })} />
 
           <div className="instructions">
             <strong>הנחיות לאחר טיפול:</strong><br />
@@ -130,6 +182,7 @@ function App() {
               width={664}
               height={200}
               style={{ background: "#fff", width: "100%" }}
+
             />
             <button
               className="clear-button"
