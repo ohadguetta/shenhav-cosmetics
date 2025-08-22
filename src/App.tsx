@@ -3,7 +3,8 @@ import logo from './assets/logo.jpg'
 import logo_favicon from './assets/logo_favicon.ico'
 import { useEffect, useState } from 'react';
 import SignaturePad from 'signature_pad';
-import { handlePost } from './send_data';
+import { handlePost, sendHtmlToPdf } from './send_data';
+import { OrbitProgress } from 'react-loading-indicators';
 
 function App() {
   type FormData = {
@@ -29,6 +30,9 @@ function App() {
     diseaseDetails: ['', '', '', ''],
     verifications: [],
   });
+  const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState<{ show: boolean; message: string; success: boolean }>({ show: false, message: '', success: false });
+
 
 
   useEffect(() => {
@@ -37,6 +41,7 @@ function App() {
       // @ts-ignore
       window.signaturePad = new SignaturePad(canvas);
     }
+
   }, []);
 
 
@@ -61,9 +66,13 @@ function App() {
     });
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('Form submitted:', formData);
     e.preventDefault();
+    const bodyWithoutLoading = document.body.cloneNode(true) as HTMLElement;
+    setLoading(true);
+
 
     const canvas = document.getElementById("signature-canvas") as HTMLCanvasElement;
     let signature = '';
@@ -73,15 +82,13 @@ function App() {
       console.log('No signature captured');
     }
 
-    // Send the PDF to the webhook
-    // await sendHtmlToPdf(document.body, 'document.pdf');
-    
 
-    // Send the signature with the rest of the form data
+    // Send the PDF to the webhook
+    await sendHtmlToPdf(bodyWithoutLoading, 'document.pdf', formData.name || 'ללא שם');
     const result = await handlePost({ ...formData, signature });
+    setLoading(false);
     if (result) {
-      console.log('Data sent successfully:', result);
-      alert('הטופס נשלח בהצלחה!');
+      setPopup({ show: true, message: 'הטופס נשלח בהצלחה!', success: true });
       setFormData({
         name: '',
         birthDate: '',
@@ -100,9 +107,8 @@ function App() {
       }
 
     } else {
-      console.log('Failed to send data');
+      setPopup({ show: true, message: 'שליחת הטופס נכשלה. נסה שוב.', success: false });
     }
-
   };
 
   return (
@@ -112,6 +118,7 @@ function App() {
         <link rel="stylesheet" href="./App.css" />
         <link rel="icon" href={logo_favicon} />
       </head>
+
 
       <div className="form-container">
         <img src={logo} alt="Shenhav Cosmetics" className="logo" />
@@ -153,7 +160,7 @@ function App() {
                   type="checkbox"
 
                   checked={formData.diseases.includes(text)}
-                  onChange={handleCheckboxChange(text,'diseases')}
+                  onChange={handleCheckboxChange(text, 'diseases')}
                 />
                 <span className="custom-checkbox"></span>
                 {text}
@@ -173,7 +180,7 @@ function App() {
                   <input
                     type="checkbox"
                     checked={formData.diseases.includes(text)}
-                    onChange={handleCheckboxChange(text,'diseases')}
+                    onChange={handleCheckboxChange(text, 'diseases')}
                   />
                   <span className="custom-checkbox"></span>
                   {text}
@@ -259,7 +266,7 @@ function App() {
                   type="checkbox"
 
                   checked={formData.verifications.includes(text)}
-                  onChange={handleCheckboxChange(text,'verifications')}
+                  onChange={handleCheckboxChange(text, 'verifications')}
                 />
                 <span className="custom-checkbox"></span>
                 {text}
@@ -270,6 +277,54 @@ function App() {
           <button className='submit-button' type="submit">שליחה</button>
         </form>
       </div>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <OrbitProgress color="#fff" size="large" text="שולח..." textColor="#fff" />
+        </div>
+      )}
+      {/* Popup Message */}
+      {popup.show && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#fff',
+            padding: '32px 48px',
+            borderRadius: 12,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ color: popup.success ? 'green' : 'red', marginBottom: 16 }}>{popup.message}</h2>
+            <button onClick={() => setPopup({ ...popup, show: false })} style={{
+              padding: '8px 24px',
+              borderRadius: 6,
+              border: 'none',
+              background: '#32cd32',
+              color: '#fff',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}>
+              סגור
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

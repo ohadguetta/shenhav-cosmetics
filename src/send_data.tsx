@@ -1,33 +1,37 @@
 // import 'dotenv/config';
-// import html2pdf from 'html2pdf.js';
+import html2pdf from 'html2pdf.js';
 const APP_ID = import.meta.env.VITE_APP_ID || 'APP_ID'; 
-const webhookUrl = import.meta.env.VITE_WEB_HOOK; // Replace with your actual webhook URL
+const webhookUrl = import.meta.env.VITE_WEBHOOK_URL; // Replace with your actual webhook URL
+const webhookAuthToken = import.meta.env.VITE_WEBHOOK_AUTH_TOKEN; // Replace with your actual auth token
 
 
-
-// export const sendHtmlToPdf = (element: HTMLElement, fileName: string) => {
-//   const options = {
-//     margin: 0.5,
-//     filename: fileName,
-//     image: { type: 'jpeg', quality: 0.98 },
-//     html2canvas: { scale: 2 },
-//     jsPDF: { unit: 'in', format: 'a4', orientation: 'horizontal' as const },
-//   };
-//   html2pdf().set(options).from(element).save();
-//   //send to email
-//   const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
-//   try {
-//     const response = await fetch(webhookUrl, {
-//       method: 'POST',
-//       body: pdfBlob,
-//     });
-//     if (!response.ok) {
-//       console.error('Failed to send PDF to webhook:', response.statusText);
-//     }
-//   } catch (error) {
-//     console.error('Error sending PDF to webhook:', error);
-//   }
-// }
+export const sendHtmlToPdf = async (element: HTMLElement, fileName: string, customerName: string) => {
+  const options = {
+    margin: 0.5,
+    filename: fileName,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' as const },
+  };
+  //send to email
+  const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      body: pdfBlob,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'AUTH_TOKEN': `${webhookAuthToken}`,
+        'Customer-Name': encodeURIComponent(customerName)
+      },
+    });
+    if (!response.ok) {
+      console.error('Failed to send PDF to webhook:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error sending PDF to webhook:', error);
+  }
+}
 
 // Remove dotenv and process.env usage for client-side code
 
