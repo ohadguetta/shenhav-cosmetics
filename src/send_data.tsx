@@ -1,22 +1,52 @@
 // import 'dotenv/config';
+// import html2pdf from 'html2pdf.js';
+const APP_ID = import.meta.env.VITE_APP_ID || 'APP_ID'; 
+const webhookUrl = import.meta.env.VITE_WEB_HOOK; // Replace with your actual webhook URL
 
+
+
+// export const sendHtmlToPdf = (element: HTMLElement, fileName: string) => {
+//   const options = {
+//     margin: 0.5,
+//     filename: fileName,
+//     image: { type: 'jpeg', quality: 0.98 },
+//     html2canvas: { scale: 2 },
+//     jsPDF: { unit: 'in', format: 'a4', orientation: 'horizontal' as const },
+//   };
+//   html2pdf().set(options).from(element).save();
+//   //send to email
+//   const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
+//   try {
+//     const response = await fetch(webhookUrl, {
+//       method: 'POST',
+//       body: pdfBlob,
+//     });
+//     if (!response.ok) {
+//       console.error('Failed to send PDF to webhook:', response.statusText);
+//     }
+//   } catch (error) {
+//     console.error('Error sending PDF to webhook:', error);
+//   }
+// }
 
 // Remove dotenv and process.env usage for client-side code
-const APP_ID = import.meta.env.VITE_APP_ID || 'APP_ID'; 
 
 export const handlePost = async (clientData: { [key: string]: any }) => {
   console.log('Sending data to server:', clientData);
   const date = new Date();
   const inputValue: { [key: string]: string } = {
-    'אימייל': clientData.email,
     'שם מלא': clientData.name,
     'תאריך לידה': clientData.birthDate,
-    'גיל': clientData.birthDate ? Math.floor((date.getTime() - new Date(clientData.birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toString() : '',
+    'גיל': clientData.age,
     'טלפון': clientData.phone,
     'חתימה': clientData.signature,
     'מחלות': clientData.diseases.join(', '),
+    'פרטי מחלות ותרופות': clientData.diseaseDetails.join(', '),
     'מידע נוסף': clientData.moreInfo.join(', '),
     'נוצר בתאריך': date.toLocaleString(),
+    'אישור עיסוי בקרקפת': clientData.verifications.includes('האם את/ה מאשר/ת עיסוי בקרקפת?') ? 'כן' : 'לא',
+    'אישור פרסום תמונות': clientData.verifications.includes('האם את/ה מאשר/ת פרסום תמונות?') ? 'כן' : 'לא',
+
   };
   console.log(inputValue);
   const baseURL = `https://script.google.com/macros/s/${APP_ID}/exec`;

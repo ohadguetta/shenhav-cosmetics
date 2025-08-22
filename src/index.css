@@ -46,6 +46,15 @@ margin-bottom: 15px;
 font-size: 14px;
 }
 
+.logo{
+width: 280px;
+height: auto;
+display: block;
+margin-left: auto;
+margin-right: auto;
+margin-bottom: 20px;
+
+}
 
 textarea {
 resize: vertical;
@@ -121,6 +130,10 @@ border-radius: 8px;
 .logo {
 width: 90px;
 margin-bottom: 10px;
+display: block;
+margin-left: auto;
+margin-right: auto;
+
 }
 
 .checkbox-item {
