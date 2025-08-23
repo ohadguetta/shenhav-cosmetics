@@ -1,8 +1,8 @@
 // import 'dotenv/config';
 import html2pdf from 'html2pdf.js';
-const APP_ID = import.meta.env.VITE_APP_ID || 'APP_ID'; 
 const webhookUrl = import.meta.env.VITE_WEBHOOK_URL; // Replace with your actual webhook URL
 const webhookAuthToken = import.meta.env.VITE_WEBHOOK_AUTH_TOKEN; // Replace with your actual auth token
+
 
 
 export const sendHtmlToPdf = async (element: HTMLElement, fileName: string, customerName: string) => {
@@ -16,7 +16,7 @@ export const sendHtmlToPdf = async (element: HTMLElement, fileName: string, cust
   //send to email
   const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl + 'shenhav-pdf-send', {
       method: 'POST',
       body: pdfBlob,
       headers: {
@@ -52,27 +52,30 @@ export const handlePost = async (clientData: { [key: string]: any }) => {
     'אישור פרסום תמונות': clientData.verifications.includes('האם את/ה מאשר/ת פרסום תמונות?') ? 'כן' : 'לא',
 
   };
+
+
   console.log(inputValue);
-  const baseURL = `https://script.google.com/macros/s/${APP_ID}/exec`;
   const formData = new FormData();
   Object.keys(inputValue).forEach((key) => {
     formData.append(key, inputValue[key]);
   });
   try {
-    const res = await fetch(baseURL, {
+    const response = await fetch(webhookUrl + 'shenhav-form-submit', {
       method: 'POST',
-      body: formData,
+      body: JSON.stringify(inputValue),
+      headers: {
+        'Content-Type': 'application/json',
+        'AUTH_TOKEN': `${webhookAuthToken}`
+      },
     });
-    if (res.ok) {
-      console.log('Request was successful:', res);
-      
-    } else {
-      console.log('Request Failed:', res);
+    
+    if (!response.ok) {
+      console.error('Failed to send PDF to webhook:', response.statusText);
+      return null;
     }
-    const data = await res.json();
-    return data;
-
-  } catch (e) {
-    console.error('Error during fetch:', e);
+    return response.json();
+    
+  } catch (error) {
+    console.error('Error sending PDF to webhook:', error);
   }
 };

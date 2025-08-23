@@ -1,4 +1,3 @@
-import './App.css'
 import logo from './assets/logo.jpg'
 import logo_favicon from './assets/logo_favicon.ico'
 import { useEffect, useState } from 'react';
@@ -40,6 +39,14 @@ function App() {
     if (canvas) {
       // @ts-ignore
       window.signaturePad = new SignaturePad(canvas);
+      const resizeCanvas = () => {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d")?.scale(ratio, ratio);
+      };
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
     }
 
   }, []);
@@ -139,20 +146,20 @@ function App() {
         <h1>Shenhav Cosmetics</h1>
         <h2>טופס אנמנזה - טיפול פנים</h2>
         <form onSubmit={handleSubmit}>
-          <label>שם פרטי ומשפחה:</label>
+          <label>שם פרטי ומשפחה: <span className="required">*</span></label>
           <input name="name" type="text" required value={formData.name} onChange={handleChange} />
 
-          <label>תאריך לידה:</label>
+          <label>תאריך לידה: <span className="required">*</span></label>
           <input name="birthDate" type="date" required value={formData.birthDate} onChange={handleChange} />
 
-          <label>גיל:</label>
+          <label>גיל: <span className="required">*</span></label>
           <input name="age" type="number" required value={formData.age} onChange={handleChange} />
 
-          <label>טלפון:</label>
+          <label>טלפון: <span className="required">*</span></label>
           <input name="phone" type="tel" required value={formData.phone} onChange={handleChange} />
 
           <div className="checkbox-group">
-            <label>האם אתה סובל מאחת המחלות הבאות? (סמן את המתאים)</label>
+            <label>האם את/ה סובל/ת מאחת המחלות הבאות? (סמן/י את המתאים)</label>
             {[
               'האם את בהריון?',
               'האם את מניקה או לאחר לידה?',
@@ -203,6 +210,7 @@ function App() {
                   <input
                     type="text"
                     placeholder="פרט/י כאן..."
+                    required
                     style={{ marginTop: 8, marginBottom: 8, width: '100%' }}
                     value={
                       // Store explanation in diseaseDetails[0] for תרופות קבועות, diseaseDetails[1] for אלרגיות
@@ -228,10 +236,10 @@ function App() {
 
 
 
-          <label>מה הביא אותך לטיפול פנים?</label>
+          <label>מה הביא אותך לטיפול פנים? <span className="required">*</span></label>
           <input type="text" required value={formData.moreInfo[0]} onChange={e => setFormData({ ...formData, moreInfo: [e.target.value, formData.moreInfo[1]] })} />
 
-          <label>האם את/ה משתמש/ת בחומרים לפנים באופן יום-יומי? אם כן פרט/י:</label>
+          <label>האם את/ה משתמש/ת בחומרים לפנים באופן יום-יומי? אם כן פרט/י: <span className="required">*</span></label>
           <input type="text" required value={formData.moreInfo[1]} onChange={e => setFormData({ ...formData, moreInfo: [formData.moreInfo[0], e.target.value] })} />
 
           <div className="instructions">
@@ -244,14 +252,12 @@ function App() {
             - לדווח לקוסמטיקאית על תופעות לוואי או רגישות יתר.
           </div>
 
-          <label>חתימת הלקוח/ה:</label>
+          <label>חתימת הלקוח/ה: <span className="required">*</span></label>
           <div style={{ border: "1px solid #ccc", marginBottom: 8, position: "relative" }}>
             <canvas
               id="signature-canvas"
-              width={664}
-              height={200}
-              style={{ background: "#fff", width: "100%" }}
-
+              height='300px'
+              style={{ background: "#fff", width: "100%", height: "100%" }}
             />
             <button
               className="clear-button"
