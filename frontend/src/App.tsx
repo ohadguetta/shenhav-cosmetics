@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react';
 import SignaturePad from 'signature_pad';
 import { handlePost, sendHtmlToPdf } from './send_data';
 import { OrbitProgress } from 'react-loading-indicators';
+import ReCAPTCHA from "react-google-recaptcha";
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+
+
 
 function App() {
   type FormData = {
@@ -293,6 +299,16 @@ function App() {
               </label>
             ))}
           </div>
+
+          <ReCAPTCHA
+            sitekey={RECAPTCHA_SITE_KEY}
+            onChange={(value) => {
+
+              console.log("Captcha value:", value);
+
+            }}
+            style={{ margin: '16px 0' }}
+          />
 
           <button className='submit-button' type="submit">שליחה</button>
         </form>
