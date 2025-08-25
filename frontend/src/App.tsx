@@ -148,21 +148,21 @@ function App() {
 
 
       <div className="form-container">
-        <img src={logo} alt="Shenhav Cosmetics" className="logo" style={{ cursor: 'pointer' }} onClick={() => {sendHtmlToPdf(document.body, 'document.pdf', formData.name || 'ללא שם')}} />
+        <img src={logo} alt="Shenhav Cosmetics" className="logo"  />
         <h1>Shenhav Cosmetics</h1>
         <h2>טופס אנמנזה - טיפול פנים</h2>
-        <form onSubmit={handleSubmit}>
-          <label>שם פרטי ומשפחה: <span className="required">*</span></label>
-          <input name="name" type="text" required value={formData.name} onChange={handleChange} />
+        <form onSubmit={handleSubmit} aria-label="טופס אנמנזה - טיפול פנים">
+          <label htmlFor="name">שם פרטי ומשפחה: <span className="required">*</span></label>
+          <input id="name" name="name" type="text" required value={formData.name} onChange={handleChange} aria-required="true" />
 
-          <label>תאריך לידה: <span className="required">*</span></label>
-          <input name="birthDate" type="date" required value={formData.birthDate} onChange={handleChange} />
+          <label htmlFor="birthDate">תאריך לידה: <span className="required">*</span></label>
+          <input id="birthDate" name="birthDate" type="date" required value={formData.birthDate} onChange={handleChange} aria-required="true" />
 
-          <label>גיל: <span className="required">*</span></label>
-          <input name="age" type="number" required value={formData.age} onChange={handleChange} />
+          <label htmlFor="age">גיל: <span className="required">*</span></label>
+          <input id="age" name="age" type="number" required value={formData.age} onChange={handleChange} aria-required="true" />
 
-          <label>טלפון: <span className="required">*</span></label>
-          <input name="phone" type="tel" required value={formData.phone} onChange={handleChange} />
+          <label htmlFor="phone">טלפון: <span className="required">*</span></label>
+          <input id="phone" name="phone" type="tel" required value={formData.phone} onChange={handleChange} aria-required="true" />
 
           <div className="checkbox-group">
             <label>האם את/ה סובל/ת מאחת המחלות הבאות? (סמן/י את המתאים)</label>
@@ -316,29 +316,34 @@ function App() {
 
       {/* Loading Overlay */}
       {loading && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div
+          aria-live="polite"
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
           <OrbitProgress color="#fff" size="large" text="שולח..." textColor="#fff" />
         </div>
       )}
       {/* Popup Message */}
       {popup.show && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          zIndex: 10000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div
+          role="alert"
+          aria-live="assertive"
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
           <div style={{
             background: '#fff',
             padding: '32px 48px',
@@ -347,15 +352,18 @@ function App() {
             textAlign: 'center'
           }}>
             <h2 style={{ color: popup.success ? 'green' : 'red', marginBottom: 16 }}>{popup.message}</h2>
-            <button onClick={() => setPopup({ ...popup, show: false })} style={{
-              padding: '8px 24px',
-              borderRadius: 6,
-              border: 'none',
-              background: '#32cd32',
-              color: '#fff',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}>
+            <button
+              aria-label="סגור הודעה"
+              onClick={() => setPopup({ ...popup, show: false })}
+              style={{
+                padding: '8px 24px',
+                borderRadius: 6,
+                border: 'none',
+                background: '#32cd32',
+                color: '#fff',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>
               סגור
             </button>
           </div>

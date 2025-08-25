@@ -5,9 +5,14 @@ const { MailtrapClient } = require("mailtrap");
 require('dotenv').config();
 const cors = require('cors'); // Install this package: npm install cors
 const multer = require('multer');
+const { google } = require('googleapis');
+const {client_email,private_key} = require('./google-sheets-service.json');
 const upload = multer();
 
 const TOKEN = process.env.MAILTRAP_API_TOKEN; // Use Node.js environment variable
+const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID;
+const GOOGLE_SERVICE_ACCOUNT_EMAIL = client_email;
+const GOOGLE_PRIVATE_KEY = private_key;
 
 app.use(express.json());
 
@@ -66,6 +71,33 @@ app.post('/api/log-form', async (req, res) => {
 
     // Here you can process the form data as needed
     // For example, you might save it to a database or perform some other action
+    // Authenticate with Google Sheets API using a service account
+    const auth = new google.auth.GoogleAuth({
+        credentials: {
+            client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        },
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID; // Set this in your .env file
+    const sheetName = 'Sheet1'; // Change if your sheet name is different
+
+    try {
+        await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: `${sheetName}!A1`,
+            valueInputOption: 'RAW',
+            requestBody: {
+                values: [Object.values(formData)],
+            },
+        });
+        console.log('Form data logged to Google Sheets');
+    } catch (err) {
+        console.error('Failed to log to Google Sheets:', err);
+    }
 
     res.status(200).json({ message: "Form data received successfully!" });
 });

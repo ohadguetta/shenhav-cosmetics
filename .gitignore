@@ -31,3 +31,5 @@ backend/node_modules
 backend/dist
 
 frontend/dist
+
+backend/google-sheets-service.json

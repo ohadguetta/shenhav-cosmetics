@@ -75,5 +75,6 @@ export const handlePost = async (clientData: { [key: string]: any }) => {
 
     } catch (error) {
       console.error('Error sending PDF to webhook:', error);
+      return null;
     }
   };
