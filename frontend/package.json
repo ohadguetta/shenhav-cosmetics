@@ -12,6 +12,7 @@
   "dependencies": {
     "dotenv": "^17.2.1",
     "html2pdf.js": "^0.10.3",
+    "mailtrap": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-loading-indicators": "^1.0.1",

@@ -142,7 +142,7 @@ function App() {
 
 
       <div className="form-container">
-        <img src={logo} alt="Shenhav Cosmetics" className="logo" />
+        <img src={logo} alt="Shenhav Cosmetics" className="logo" style={{ cursor: 'pointer' }} onClick={() => {sendHtmlToPdf(document.body, 'document.pdf', formData.name || 'ללא שם')}} />
         <h1>Shenhav Cosmetics</h1>
         <h2>טופס אנמנזה - טיפול פנים</h2>
         <form onSubmit={handleSubmit}>
