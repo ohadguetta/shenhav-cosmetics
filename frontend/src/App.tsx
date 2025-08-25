@@ -24,6 +24,8 @@ function App() {
     verifications: string[];
   };
 
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     birthDate: '',
@@ -96,6 +98,11 @@ function App() {
     // Clone body and inject signature into cloned canvas
     const bodyWithoutLoading = document.body.cloneNode(true) as HTMLElement;
     const clonedCanvas = bodyWithoutLoading.querySelector("#signature-canvas") as HTMLCanvasElement;
+    if (!isCaptchaVerified){
+      console.log('Captcha not verified');
+      setPopup({ show: true, message: 'יש למלא את ReCaptcha', success: false });
+      return;
+    }
     if (clonedCanvas && signature) {
       setLoading(true);
       const ctx = clonedCanvas.getContext("2d");
@@ -303,9 +310,8 @@ function App() {
           <ReCAPTCHA
             sitekey={RECAPTCHA_SITE_KEY}
             onChange={(value) => {
-
+              setIsCaptchaVerified(!!value);
               console.log("Captcha value:", value);
-
             }}
             style={{ margin: '16px 0' }}
           />
