@@ -18,7 +18,7 @@ export const sendHtmlToPdf = async (element: HTMLElement, fileName: string, cust
     formData.append('pdfBlob', pdfBlob, fileName);
     formData.append('customerName', customerName);
 
-    const response = await fetch('http://localhost:3000/api/send-email', {
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + 'send-email', {
       method: 'POST',
       body: formData,
       // Do not set Content-Type header; browser will set it to multipart/form-data with boundary
@@ -59,12 +59,11 @@ export const handlePost = async (clientData: { [key: string]: any }) => {
       formData.append(key, inputValue[key]);
     });
     try {
-      const response = await fetch(webhookUrl + 'shenhav-form-submit', {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + 'log-form', {
         method: 'POST',
         body: JSON.stringify(inputValue),
         headers: {
-          'Content-Type': 'application/json',
-          'AUTH_TOKEN': `${webhookAuthToken}`
+          'Content-Type': 'application/json'
         },
       });
 

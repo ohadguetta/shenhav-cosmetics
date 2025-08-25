@@ -12,7 +12,7 @@ const TOKEN = process.env.MAILTRAP_API_TOKEN; // Use Node.js environment variabl
 app.use(express.json());
 
 app.use(cors({
-  origin: 'http://localhost:5173' // Allow requests from your frontend origin
+  origin: ['http://localhost:5173', 'https://shenhav-cosmetics.vercel.app']
 }));
 
 
@@ -32,7 +32,7 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
 
     const sender = {
         email: "hello@demomailtrap.co",
-        name: customerName,
+        name: 'Mailtrap',
     };
     const recipients = [
         {
@@ -44,9 +44,8 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
         await client.send({
             from: sender,
             to: recipients,
-            subject: "You are awesome!",
-            text: "Congrats for sending test email with Mailtrap!",
-            category: "Integration Test",
+            subject: customerName,
+            text: customerName,
             attachments: [
                 {
                     filename: "document.pdf",
@@ -61,9 +60,18 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
     }
 });
 
+app.post('/api/log-form', async (req, res) => {
+    const formData = req.body;
+    console.log("Received form data:", formData);
+
+    // Here you can process the form data as needed
+    // For example, you might save it to a database or perform some other action
+
+    res.status(200).json({ message: "Form data received successfully!" });
+});
 
 app.get('/', (req, res) => {
-    res.send('Hello from the Node.js backend!');
+    res.send('Healthy');
 });
 
 app.listen(port, () => {
