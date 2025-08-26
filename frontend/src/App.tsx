@@ -311,7 +311,6 @@ function App() {
             sitekey={RECAPTCHA_SITE_KEY}
             onChange={(value) => {
               setIsCaptchaVerified(!!value);
-              console.log("Captcha value:", value);
             }}
             style={{ margin: '16px 0' }}
           />

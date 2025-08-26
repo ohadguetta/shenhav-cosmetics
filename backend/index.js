@@ -6,13 +6,12 @@ require('dotenv').config();
 const cors = require('cors'); // Install this package: npm install cors
 const multer = require('multer');
 const { google } = require('googleapis');
-const {client_email,private_key} = require('./google-sheets-service.json');
 const upload = multer();
 
 const TOKEN = process.env.MAILTRAP_API_TOKEN; // Use Node.js environment variable
 const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID;
-const GOOGLE_SERVICE_ACCOUNT_EMAIL = client_email;
-const GOOGLE_PRIVATE_KEY = private_key;
+const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
 
 app.use(express.json());
 
@@ -65,13 +64,11 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
     }
 });
 
+// Endpoint to log form data
 app.post('/api/log-form', async (req, res) => {
     const formData = req.body;
     console.log("Received form data:", formData);
 
-    // Here you can process the form data as needed
-    // For example, you might save it to a database or perform some other action
-    // Authenticate with Google Sheets API using a service account
     const auth = new google.auth.GoogleAuth({
         credentials: {
             client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -82,8 +79,8 @@ app.post('/api/log-form', async (req, res) => {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID; // Set this in your .env file
-    const sheetName = 'Sheet1'; // Change if your sheet name is different
+    const spreadsheetId = GOOGLE_SHEET_ID; 
+    const sheetName = 'Sheet1';
 
     try {
         await sheets.spreadsheets.values.append({
