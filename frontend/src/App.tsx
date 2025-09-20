@@ -5,6 +5,7 @@ import SignaturePad from 'signature_pad';
 import { handlePost, sendHtmlToPdf } from './send_data';
 import { OrbitProgress } from 'react-loading-indicators';
 import ReCAPTCHA from "react-google-recaptcha";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
@@ -81,7 +82,25 @@ function App() {
     });
   };
 
-
+  const checkIfCaptchaVerified = async (value: string | null) => {
+    try {
+      const response = await fetch(BACKEND_URL + 'verify-recaptcha', {
+        method: 'POST',
+        body: JSON.stringify({ token: value }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        console.error('Failed to verify reCAPTCHA:', response.statusText);
+      }
+      const data = await response.json();
+      return data.success;
+    } catch (error) {
+      console.error('Error verifying reCAPTCHA:', error);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,12 +117,17 @@ function App() {
     // Clone body and inject signature into cloned canvas
     const bodyWithoutLoading = document.body.cloneNode(true) as HTMLElement;
     const clonedCanvas = bodyWithoutLoading.querySelector("#signature-canvas") as HTMLCanvasElement;
-    if (!isCaptchaVerified){
+
+
+    
+    // Check if recaptcha is verified
+    if (!isCaptchaVerified) {
       console.log('Captcha not verified');
       setPopup({ show: true, message: 'יש למלא את ReCaptcha', success: false });
       return;
     }
-    if (clonedCanvas && signature) {
+
+    if (clonedCanvas && signature && isCaptchaVerified) {
       setLoading(true);
       const ctx = clonedCanvas.getContext("2d");
       const img = new window.Image();
@@ -307,10 +331,11 @@ function App() {
             ))}
           </div>
 
+
           <ReCAPTCHA
             sitekey={RECAPTCHA_SITE_KEY}
-            onChange={(value) => {
-              setIsCaptchaVerified(!!value);
+            onChange={async (value) => {
+              setIsCaptchaVerified(await checkIfCaptchaVerified(value));
             }}
             style={{ margin: '16px 0' }}
           />

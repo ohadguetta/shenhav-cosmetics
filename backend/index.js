@@ -99,6 +99,30 @@ app.post('/api/log-form', async (req, res) => {
     res.status(200).json({ message: "Form data received successfully!" });
 });
 
+app.post('/api/verify-recaptcha', (req, res) => {
+    const { token } = req.body;
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    if (!token) {
+        return res.status(400).json({ success: false, message: 'No token provided' });
+    }
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
+    fetch(verificationUrl, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                res.status(200).json({ success: true, message: 'Captcha verified successfully' });
+            } else {
+                res.status(400).json({ success: false, message: 'Captcha verification failed' });
+            }
+            console.log('Captcha verification response:', data);
+        })
+        .catch(error => {
+            console.error('Error verifying captcha:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        });
+        
+});
+
 app.get('/', (req, res) => {
     res.send('Healthy');
 });
