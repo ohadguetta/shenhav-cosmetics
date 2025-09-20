@@ -81,7 +81,7 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
 
     try {
 
-        await sendMail("o4255542@gmail.com", "לקוח מילא טופס אמנזה", `שם לקוח: ${customerName}`, pdfBlob);
+        await sendMail("o4255542@gmail.com", "New Form Submission", `שם לקוח: ${customerName}`, pdfBlob);
     } catch (error) {
         console.error('Error sending email:', error);
         return res.status(500).json({ success: false, error: "Failed to send email." });
