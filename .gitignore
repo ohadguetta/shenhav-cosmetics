@@ -33,3 +33,7 @@ backend/dist
 frontend/dist
 
 backend/google-sheets-service.json
+setup_auth/client_secret.json
+setup_auth/node_modules/
+setup_auth/token.json
+setup_auth/package-lock.json

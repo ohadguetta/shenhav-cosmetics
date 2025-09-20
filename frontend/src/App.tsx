@@ -102,6 +102,8 @@ function App() {
     }
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -131,35 +133,35 @@ function App() {
       setLoading(true);
       const ctx = clonedCanvas.getContext("2d");
       const img = new window.Image();
-      img.onload = () => {
+      img.onload = async () => {
         ctx?.clearRect(0, 0, clonedCanvas.width, clonedCanvas.height);
         ctx?.drawImage(img, 0, 0, clonedCanvas.width, clonedCanvas.height);
-        // Send the PDF to the webhook after signature is drawn
-        sendHtmlToPdf(bodyWithoutLoading, 'document.pdf', formData.name || 'ללא שם').then(async () => {
-          const result = await handlePost({ ...formData, signature });
-          setLoading(false);
-          if (result) {
-            setPopup({ show: true, message: 'הטופס נשלח בהצלחה!', success: true });
-            setFormData({
-              name: '',
-              birthDate: '',
-              age: '',
-              phone: '',
-              signature: '',
-              diseases: [],
-              moreInfo: ['', ''],
-              diseaseDetails: ['', '', '', ''],
-              verifications: [],
-            });
-            // Clear the signature pad
-            const canvas = document.getElementById("signature-canvas") as HTMLCanvasElement;
-            if (canvas && (window as any).signaturePad) {
-              (window as any).signaturePad.clear();
-            }
-          } else {
-            setPopup({ show: true, message: 'שליחת הטופס נכשלה. נסה שוב.', success: false });
+
+        // Now send the PDF to the webhook after signature is drawn
+        const result_log_mail = await sendHtmlToPdf(bodyWithoutLoading, 'document.pdf', formData.name || 'ללא שם');
+        const result_log_excel = await handlePost({ ...formData, signature });
+        setLoading(false);
+        if (result_log_excel && result_log_mail) {
+          setPopup({ show: true, message: 'הטופס נשלח בהצלחה!', success: true });
+          setFormData({
+            name: '',
+            birthDate: '',
+            age: '',
+            phone: '',
+            signature: '',
+            diseases: [],
+            moreInfo: ['', ''],
+            diseaseDetails: ['', '', '', ''],
+            verifications: [],
+          });
+          // Clear the signature pad
+          const canvas = document.getElementById("signature-canvas") as HTMLCanvasElement;
+          if (canvas && (window as any).signaturePad) {
+            (window as any).signaturePad.clear();
           }
-        });
+        } else {
+          setPopup({ show: true, message: 'שליחת הטופס נכשלה. נסה שוב.', success: false });
+        }
       };
       img.src = signature;
       return; // Prevent further execution until image is drawn

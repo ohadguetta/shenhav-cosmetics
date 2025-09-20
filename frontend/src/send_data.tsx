@@ -17,16 +17,19 @@ export const sendHtmlToPdf = async (element: HTMLElement, fileName: string, cust
     const formData = new FormData();
     formData.append('pdfBlob', pdfBlob, fileName);
     formData.append('customerName', customerName);
-
     const response = await fetch(BACKEND_URL + 'send-email', {
       method: 'POST',
       body: formData,
       // Do not set Content-Type header; browser will set it to multipart/form-data with boundary
     });
-
+    
     if (!response.ok) {
       console.error('Failed to send PDF to webhook:', response.statusText);
     }
+    const data = await response.json();
+    console.log('Email send response:', data);
+    return data.success ? true : false;
+
   } catch (error) {
     console.error('Error sending PDF to webhook:', error);
   }
