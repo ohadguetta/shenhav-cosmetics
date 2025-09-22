@@ -19,6 +19,8 @@ const GOOGLE_GMAIL_CLIENT_ID = process.env.GOOGLE_GMAIL_CLIENT_ID;
 const GOOGLE_GMAIL_REDIRECT_URI = process.env.GOOGLE_GMAIL_REDIRECT_URI;
 const GOOGLE_GMAIL_REFRESH_TOKEN = process.env.GOOGLE_GMAIL_REFRESH_TOKEN;
 
+const EMAIL_TO_SEND = process.env.EMAIL_TO_SEND;
+
 app.use(express.json());
 
 app.use(cors({
@@ -81,7 +83,7 @@ app.post('/api/send-email', upload.single('pdfBlob'), async (req, res) => {
 
     try {
 
-        await sendMail("o4255542@gmail.com", "New Form Submission", `שם לקוח: ${customerName}`, pdfBlob);
+        await sendMail(EMAIL_TO_SEND, "New Amnesia Form Submission", `שם לקוח: ${customerName}`, pdfBlob);
     } catch (error) {
         console.error('Error sending email:', error);
         return res.status(500).json({ success: false, error: "Failed to send email." });
